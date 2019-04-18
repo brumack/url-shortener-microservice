@@ -58,13 +58,35 @@ app.post('/api/shorturl/new', (req, res) => {
     
   dns.lookup(result.domain, options, (err, address, family) => {
     if (address) {
-      new shortURL({
-        long: url,
-        short: Math.floor(Math.random() * 1000)
-      }).save((err, url) => {
-        if (err) return res.json({"error":"ser"}
-        return res.json(url)
+      
+      shortURL.find({long: url}, (err, foundURL) => {
+        
+        console.log('found?', foundURL)
+        
+        // IF ALREADY EXISTS, SEND RECORD
+        if (foundURL)
+          return res.json({original_url: foundURL.long, short_url: foundURL.short})
+        
+        // COUNT NUMBER OF RECORDS
+        
+        shortURL.find({}, (err, urls) => {
+          const total = urls.length
+          console.log('all records', urls)
+          
+          // CREATE NEW RECORD
+          new shortURL({
+            long: url,
+            short: total + 1
+          }).save((err, url) => {
+            if (err) return res.json({"error":"server error"})
+            return res.json({original_url: url.long, short_url: url.short})
+          })
+        })
       })
+      
+      
+      
+      
     } else return res.json({"error":"invalid URL"})
   })
 })
