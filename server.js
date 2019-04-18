@@ -35,14 +35,23 @@ app.get("/api/hello", function (req, res) {
 
 app.post('/api/shorturl/new', (req, res) => {
   const { url } = req.body
-  dns.lookup('https://www.google.com', (err, address, family) => {
-    console.log(address)
-  })
-  // check if url already exists
-  // create new short url
-  // save to db
-  // send response
+  let urlRegexp = /http[s]{0,1}\:\/\/www.\(?domain/
+  
+  const options = {
+    family: 4,
+    hints: dns.ADDRCONFIG | dns.V4MAPPED,
+  };
+  
+  console.log(url)
+  
+  dns.lookup('freecodecamp.org', options, (err, address, family) =>
+    console.log(`address: ${address} family: IPv${family}`));
+    // check if url already exists
+    // create new short url
+    // save to db
+    // send response
 })
+  
 
 
 app.listen(port, function () {
