@@ -60,18 +60,14 @@ app.post('/api/shorturl/new', (req, res) => {
     if (address) {
       
       shortURL.find({long: url}, (err, foundURL) => {
-        
-        console.log('found?', foundURL)
-        
+                
         // IF ALREADY EXISTS, SEND RECORD
-        if (foundURL)
-          return res.json({original_url: foundURL.long, short_url: foundURL.short})
+        if (foundURL.length != 0)
+          return res.json({original_url: foundURL[0].long, short_url: foundURL[0].short})
         
         // COUNT NUMBER OF RECORDS
-        
         shortURL.find({}, (err, urls) => {
           const total = urls.length
-          console.log('all records', urls)
           
           // CREATE NEW RECORD
           new shortURL({
@@ -83,15 +79,19 @@ app.post('/api/shorturl/new', (req, res) => {
           })
         })
       })
-      
-      
-      
-      
     } else return res.json({"error":"invalid URL"})
   })
 })
   
-
+app.get('/api/shorturl/:short', (req, res) => {
+  const { short } = req.params
+  shortURL.find({short}, (err, urls) => {
+    if (err) return res.json({"error":"server error"})
+    if (urls.length === 0)
+      return res.json({"error":"short url not found"})
+    res.redirect(urls[0].long)
+  })
+})
 
 app.listen(port, function () {
   console.log('Node.js listening ...');
