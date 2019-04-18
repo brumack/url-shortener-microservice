@@ -15,10 +15,10 @@ var port = process.env.PORT || 3000;
 
 mongoose.connect(process.env.MONGOLAB_URI);
 
-const Schema = mongoose.schema
+const Schema = mongoose.Schema
 
 const ShortSchema = new Schema({
-  full: String,
+  long: String,
   short: Number
 })
 
@@ -58,15 +58,14 @@ app.post('/api/shorturl/new', (req, res) => {
     
   dns.lookup(result.domain, options, (err, address, family) => {
     if (address) {
-      return res.json({address})
-      // valid address
-      // check if url+path exists
-      // if not, create and send response
-      // if yes, send response
-    } else {
-      // invalid url
-      return res.json({"error":"invalid URL"})
-    }
+      new shortURL({
+        long: url,
+        short: Math.floor(Math.random() * 1000)
+      }).save((err, url) => {
+        if (err) return res.json({"error":"ser"}
+        return res.json(url)
+      })
+    } else return res.json({"error":"invalid URL"})
   })
 })
   
