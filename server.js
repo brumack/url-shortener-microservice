@@ -15,6 +15,15 @@ var port = process.env.PORT || 3000;
 
 mongoose.connect(process.env.MONGOLAB_URI);
 
+const Schema = mongoose.schema
+
+const ShortSchema = new Schema({
+  full: String,
+  short: Number
+})
+
+const shortURL = mongoose.model('ShortURL', ShortSchema)
+
 app.use(cors());
 app.use(bodyParser.urlencoded({extended: false}))
 
@@ -35,24 +44,30 @@ app.get("/api/hello", function (req, res) {
 
 app.post('/api/shorturl/new', (req, res) => {
   const { url } = req.body
-  let urlRegexp = /http[s]{0,1}\:\/\/www\.(?<domain>[a-z0-9]{1,}\.org)/i
-  let result = url.match(urlRegexp).groups
+  let urlRegexp = /http[s]{0,1}\:\/\/www\.(?<domain>[a-z0-9]{1,}\.org)(?<path>(\/\w+)*)/i
+  let result = url.match(urlRegexp) ? url.match(urlRegexp).groups : null
   
-  console.log(result)
-  
+  if (!result) {
+    return res.json({"error":"invalid URL"})
+  }
+    
   const options = {
     family: 4,
     hints: dns.ADDRCONFIG | dns.V4MAPPED,
   };
-  
-  console.log(url)
-  
-  dns.lookup(result.domain, options, (err, address, family) =>
-    console.log(`address: ${address} family: IPv${family}`));
-    // check if url already exists
-    // create new short url
-    // save to db
-    // send response
+    
+  dns.lookup(result.domain, options, (err, address, family) => {
+    if (address) {
+      return res.json({address})
+      // valid address
+      // check if url+path exists
+      // if not, create and send response
+      // if yes, send response
+    } else {
+      // invalid url
+      return res.json({"error":"invalid URL"})
+    }
+  })
 })
   
 
