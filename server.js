@@ -35,7 +35,10 @@ app.get("/api/hello", function (req, res) {
 
 app.post('/api/shorturl/new', (req, res) => {
   const { url } = req.body
-  let urlRegexp = /http[s]{0,1}\:\/\/www.\(?domain/
+  let urlRegexp = /http[s]{0,1}\:\/\/www\.(?<domain>[a-z0-9]{1,}\.org)/i
+  let result = url.match(urlRegexp).groups
+  
+  console.log(result)
   
   const options = {
     family: 4,
@@ -44,7 +47,7 @@ app.post('/api/shorturl/new', (req, res) => {
   
   console.log(url)
   
-  dns.lookup('freecodecamp.org', options, (err, address, family) =>
+  dns.lookup(result.domain, options, (err, address, family) =>
     console.log(`address: ${address} family: IPv${family}`));
     // check if url already exists
     // create new short url
